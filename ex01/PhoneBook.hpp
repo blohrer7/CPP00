@@ -6,7 +6,7 @@
 /*   By: blohrer <blohrer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 14:29:42 by blohrer           #+#    #+#             */
-/*   Updated: 2025/10/28 14:50:19 by blohrer          ###   ########.fr       */
+/*   Updated: 2025/11/04 09:50:43 by blohrer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,14 @@ class PhoneBook {
 		Contact contacts[8];
 		int count;
 		int nextIndex;
+		std::string truncateField(const std::string &field) const;
 
 	public:
-		void setContacts(const std::int& contacts, const std::int& count
-						const std::int& nextIndex);
-		
-}
+		PhoneBook();
+		void addContact();
+		void displayContacts() const;
+		void showContact(int index) const;
+};
 
 
 #endif
