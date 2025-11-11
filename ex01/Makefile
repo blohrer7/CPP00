@@ -15,7 +15,8 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++17
 
 NAME = PhoneBook
 
-SRC = PhoneBook.cpp
+SRC =	PhoneBook.cpp \
+		Contact.cpp
 OBJ = $(SRC:.cpp=.o)
 
 $(NAME): $(OBJ)
