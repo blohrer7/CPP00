@@ -6,115 +6,203 @@
 /*   By: blohrer <blohrer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 14:29:37 by blohrer           #+#    #+#             */
-/*   Updated: 2025/11/04 11:10:16 by blohrer          ###   ########.fr       */
+/*   Updated: 2025/11/14 08:22:58 by blohrer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PhoneBook.hpp"
 
-PhoneBook::PhoneBook() : count(0), nextIndex(0) {}
+PhoneBook::PhoneBook() : count(0), nextIndex(0)
+{
+}
 
-void PhoneBook::addContact() {
-	Contact newContact;
+static bool	getNonEmptyNoDigitsInput(const std::string &prompt,
+		std::string &out)
+{
+	bool	hasDigit;
+
+	while (true)
+	{
+		std::cout << prompt;
+		if (!std::getline(std::cin, out))
+			return (false);
+		if (out.empty())
+		{
+			std::cout << "Input cannot be empty. Please try again.\n";
+			continue ;
+		}
+		hasDigit = false;
+		for (size_t i = 0; i < out.length(); i++)
+		{
+			if (std::isdigit(out[i]))
+			{
+				hasDigit = true;
+				break ;
+			}
+		}
+		if (hasDigit)
+		{
+			std::cout << "Numbers are not allowed here. Please use letters only.\n";
+			continue ;
+		}
+		return (true);
+	}
+}
+
+bool	isNumeric(const std::string &s)
+{
+	if (s.empty())
+		return (false);
+	for (size_t i = 0; i < s.length(); i++)
+	{
+		if (!std::isdigit(s[i]))
+			return (false);
+	}
+	return (true);
+}
+static bool	getNumericInput(const std::string &prompt, std::string &out)
+{
+	while (true)
+	{
+		std::cout << prompt;
+		if (!std::getline(std::cin, out))
+			return (false);
+		if (out.empty())
+		{
+			std::cout << "Input cannot be empty. Please try again.\n";
+			continue ;
+		}
+		if (!isNumeric(out))
+		{
+			std::cout << "Phone number must contain digits only.\n";
+			continue ;
+		}
+		return (true);
+	}
+}
+
+bool	isValidIndex(const std::string &s)
+{
+	int	num;
+
+	if (!isNumeric(s))
+		return (false);
+	num = std::stoi(s);
+	return (num >= 1 && num <= 8);
+}
+
+void PhoneBook::addContact()
+{
+	Contact	newContact;
+
 	std::string firstName;
 	std::string lastName;
 	std::string nickName;
 	std::string phoneNumber;
 	std::string darkestSecret;
-
-	std::cout<< "Enter your first name: ";
-	if(!std::getline(std::cin, firstName))
-		return;
-	std::cout<< "Enter your last name: ";
-	if(!std::getline(std::cin, lastName))
-		return;
-	std::cout<< "Enter your nick name: ";
-	if(!std::getline(std::cin, nickName))
-		return;
-	std::cout<< "Enter your phone number: ";
-	if(!std::getline(std::cin, phoneNumber))
-		return;
-	std::cout<< "Enter your darkest secret: ";
-	if(!std::getline(std::cin, darkestSecret))
-		return;
-	newContact.setContact(firstName, lastName, nickName, phoneNumber, darkestSecret);
+	if (!getNonEmptyNoDigitsInput("Enter your first name: ", firstName))
+		return ;
+	if (!getNonEmptyNoDigitsInput("Enter your last name: ", lastName))
+		return ;
+	if (!getNonEmptyNoDigitsInput("Enter your nick name: ", nickName))
+		return ;
+	if (!getNumericInput("Enter your phone number: ", phoneNumber))
+		return ;
+	if (!getNonEmptyNoDigitsInput("Enter your darkest secret: ", darkestSecret))
+		return ;
+	newContact.setContact(firstName, lastName, nickName, phoneNumber,
+		darkestSecret);
 	contacts[nextIndex] = newContact;
 	nextIndex = (nextIndex + 1) % 8;
-	if(count < 8)
+	if (count < 8)
 		count++;
 	std::cout << "Contact added successfully!\n";
 }
 
-// TODO: Implement displayContacts()
-// - Print a table header: Index | First Name | Last Name | Nickname
-// - Use std::setw(10) for each column
-// - Loop from 0 to count-1
-//   - For each contact, use truncateField() for formatting
-//   - Skip if contact.isEmpty() == true (optional)
-// - Align output properly (right-aligned fields)
-void PhoneBook::displayContacts() const 
+void PhoneBook::displayContacts() const
 {
-	if(count == 0)
+	if (count == 0)
 	{
 		std::cout << "No contacts to display.\n";
-		return;
+		return ;
 	}
-	std::cout << std::setw(10) << "Index" << "  | "
-              << std::setw(10) << "First Name" << "  | "
-              << std::setw(10) << "Last Name" << "  | "
-              << std::setw(10) << "Nickname" << std::endl;
-	for(int i = 0; i < count; i++){
-	std::cout << std::setw(10) << "" << i << " | ";
-	std::cout << std::setw(10) << truncateField(contacts[i].getFirstName()) << " | ";
-	std::cout << std::setw(10) << truncateField(contacts[i].getLastName()) << " | ";
-	std::cout << std::setw(10) << truncateField(contacts[i].getNickName()) << std::endl;
-	i++;
+	std::cout << std::left;
+	std::cout << std::setw(10) << "Index"
+				<< " | " << std::setw(10) << "First Name"
+				<< " | " << std::setw(10) << "Last Name"
+				<< " | " << std::setw(10) << "Nickname" << std::endl;
+	for (int i = 0; i < count; i++)
+	{
+		std::cout << std::setw(10) << (i + 1) << " | ";
+		std::cout << std::setw(10) << truncateField(contacts[i].getFirstName()) << " | ";
+		std::cout << std::setw(10) << truncateField(contacts[i].getLastName()) << " | ";
+		std::cout << std::setw(10) << truncateField(contacts[i].getNickName()) << std::endl;
 	}
 }
 
-// TODO: Implement showContact()
-// - Check if index is valid (0 <= index < count)
-// - If invalid, print an error and return
-// - Otherwise, print all contact fields (with clear labels)
-// void PhoneBook::showContact(int index) const {
-//     // TODO
-// }
-
-// // TODO: Implement truncateField()
-// // - If field.size() > 10: return first 9 chars + "."
-// // - Otherwise: return field unchanged
-// std::string PhoneBook::truncateField(const std::string &field) const {
-//     // TODO
-// }
-std::string PhoneBook::truncateField(const std::string &field) const {
-    // TODO: if field.size() > 10, return first 9 chars + "."
-    // otherwise return field unchanged
-    return field;
+void PhoneBook::showContact(int index) const
+{
+	if (index < 0 || index >= count)
+	{
+		std::cout << "Invalid index.\n";
+		return ;
+	}
+	const Contact &c = contacts[index];
+	std::cout << "First name: " << c.getFirstName() << std::endl;
+	std::cout << "Last name: " << c.getLastName() << std::endl;
+	std::cout << "Nickname: " << c.getNickName() << std::endl;
+	std::cout << "Phone number: " << c.getPhoneNumber() << std::endl;
+	std::cout << "Darkest secret: " << c.getDarkestSecret() << std::endl;
 }
 
+std::string PhoneBook::truncateField(const std::string &field) const
+{
+	if (field.length() > 10)
+		return (field.substr(0, 9) + ".");
+	return (field);
+}
 
-int main() {
-    PhoneBook pb;
-    std::string command;
+int	main(void)
+{
+	PhoneBook	pb;
+	int			index;
 
-    while (true) {
-        std::cout << "\nEnter command (ADD / SEARCH / EXIT): ";
-        if (!std::getline(std::cin, command))
-            break;
-
-        if (command == "ADD") {
-            pb.addContact();
-        }
-        else if (command == "SEARCH") {
-            pb.displayContacts();
-        }
-        else if (command == "EXIT") {
-            std::cout << "Goodbye!\n";
-            break;
-        }
-        else {
-            std::cout << "Unknown command. Try again.\n";
-        }
-    }
-    return 0;
+	std::string command;
+	std::string input;
+	while (true)
+	{
+		std::cout << "\nEnter command (ADD / SEARCH / EXIT): ";
+		if (!std::getline(std::cin, command))
+			break ;
+		if (command == "ADD")
+			pb.addContact();
+		else if (command == "SEARCH")
+		{
+			pb.displayContacts();
+			while (true)
+			{
+				std::cout << "Enter index to view details: ";
+				if (!std::getline(std::cin, input))
+					break ; // Ctrl+D → exit SEARCH
+				if (!isValidIndex(input))
+				{
+					std::cout << "Invalid input. Please enter a number between 1 and 8.\n";
+					continue ;
+				}
+				index = std::stoi(input) - 1; // safe now
+				pb.showContact(index);
+				break ;
+			}
+		}
+		else if (command == "EXIT")
+		{
+			std::cout << "Goodbye!\n";
+			break ;
+		}
+		else
+		{
+			std::cout << "Unknown command. Try again.\n";
+		}
+	}
+	return (0);
 }
